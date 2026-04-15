@@ -86,6 +86,7 @@ For Fenine chain `920`, this repository includes custom `setup_service` entries 
 - `SafeProxyFactory`: `0xf4486c7e753F5E46F4c0Ef8D4266Cc53D7131020` at block `185`
 
 Use `.env.fenine.sample` as the starting point for a self-hosted deployment on Fenine.
+For local Docker runs, set `TOKENS_LOGO_BASE_URI=http://localhost:8000/media/` so token logo URLs point at the same tx-service origin instead of `tokens-logo.localhost`.
 
 For real-RPC validation on Fenine, use `scripts/smoke_test_fenine.sh`.
 The regular `pytest` suite is meant for a disposable local chain, not a shared live network.
