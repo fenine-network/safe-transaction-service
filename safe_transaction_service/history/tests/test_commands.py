@@ -437,6 +437,38 @@ class TestCommands(SafeTestCaseMixin, TestCase):
     def test_setup_service_sepolia(self):
         self._test_setup_service(EthereumNetwork.SEPOLIA)
 
+    @mock.patch.object(EthereumClient, "get_chain_id", return_value=920)
+    @mock.patch.object(EthereumClient, "get_network", autospec=True)
+    def test_setup_service_fenine_custom_addresses(
+        self,
+        ethereum_client_get_network_mock: MagicMock,
+        ethereum_client_get_chain_id_mock: MagicMock,
+    ):
+        command = "setup_service"
+        ethereum_client_get_network_mock.return_value = EthereumNetwork.UNKNOWN
+        buf = StringIO()
+
+        call_command(command, stdout=buf)
+
+        self.assertIn("Setting up chain id 920 custom safe addresses", buf.getvalue())
+        self.assertIn(
+            "Setting up chain id 920 custom proxy factory addresses", buf.getvalue()
+        )
+
+        safe_master_copy = SafeMasterCopy.objects.get(
+            address="0xF63b305B4dacDba7dc3314b8e238715E2f140492"
+        )
+        self.assertEqual(safe_master_copy.initial_block_number, 211)
+        self.assertEqual(safe_master_copy.tx_block_number, 211)
+        self.assertEqual(safe_master_copy.version, "1.5.0+L2")
+        self.assertTrue(safe_master_copy.l2)
+
+        proxy_factory = ProxyFactory.objects.get(
+            address="0xf4486c7e753F5E46F4c0Ef8D4266Cc53D7131020"
+        )
+        self.assertEqual(proxy_factory.initial_block_number, 185)
+        self.assertEqual(proxy_factory.tx_block_number, 185)
+
     @mock.patch.object(EthereumClient, "is_contract", return_value=False)
     @mock.patch.object(EthereumClient, "get_network", autospec=True)
     def test_setup_service_not_valid_network(

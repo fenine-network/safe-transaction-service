@@ -19,6 +19,21 @@ from safe_eth.safe.addresses import (
 from ...models import IndexingStatus, IndexingStatusType, ProxyFactory, SafeMasterCopy
 
 
+CUSTOM_MASTER_COPIES: dict[int, Sequence[tuple[str, int, str]]] = {
+    920: [
+        (
+            "0xF63b305B4dacDba7dc3314b8e238715E2f140492",
+            211,
+            "1.5.0+L2",
+        )
+    ]
+}
+
+CUSTOM_PROXY_FACTORIES: dict[int, Sequence[tuple[str, int]]] = {
+    920: [("0xf4486c7e753F5E46F4c0Ef8D4266Cc53D7131020", 185)]
+}
+
+
 @dataclass
 class CronDefinition:
     minute: str = "*"
@@ -188,7 +203,16 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS("Setting up Safe Contract Addresses"))
         ethereum_client = get_auto_ethereum_client()
         ethereum_network = ethereum_client.get_network()
-        if ethereum_network in MASTER_COPIES:
+        chain_id = ethereum_client.get_chain_id()
+
+        if chain_id in CUSTOM_MASTER_COPIES:
+            self.stdout.write(
+                self.style.SUCCESS(
+                    f"Setting up chain id {chain_id} custom safe addresses"
+                )
+            )
+            self._setup_safe_singleton_addresses(CUSTOM_MASTER_COPIES[chain_id])
+        elif ethereum_network in MASTER_COPIES:
             self.stdout.write(
                 self.style.SUCCESS(f"Setting up {ethereum_network.name} safe addresses")
             )
@@ -204,7 +228,14 @@ class Command(BaseCommand):
 
         self._setup_erc20_indexing()
 
-        if ethereum_network in PROXY_FACTORIES:
+        if chain_id in CUSTOM_PROXY_FACTORIES:
+            self.stdout.write(
+                self.style.SUCCESS(
+                    f"Setting up chain id {chain_id} custom proxy factory addresses"
+                )
+            )
+            self._setup_safe_proxy_factories(CUSTOM_PROXY_FACTORIES[chain_id])
+        elif ethereum_network in PROXY_FACTORIES:
             self.stdout.write(
                 self.style.SUCCESS(
                     f"Setting up {ethereum_network.name} proxy factory addresses"
@@ -222,7 +253,7 @@ class Command(BaseCommand):
         if not (SafeMasterCopy.objects.count() and ProxyFactory.objects.count()):
             self.stdout.write(
                 self.style.WARNING(
-                    f"Cannot find any SafeMasterCopy and ProxyFactory for chain id {ethereum_client.get_chain_id()}"
+                    f"Cannot find any SafeMasterCopy and ProxyFactory for chain id {chain_id}"
                 )
             )
 

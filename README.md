@@ -78,6 +78,18 @@ and then a PR should be provided [adding the deployment block number and the add
 - You can always set this up later using the **admin panel** if your network is not supported, going to the **Master Copies** and **Proxy Factories**.
 - **We recommend** using event indexing for every network where transaction fees are not relevant, so a tracing node is not required and everything can be indexed using events with the `Safe L2` version.
 
+#### Fenine example
+
+For Fenine chain `920`, this repository includes custom `setup_service` entries for:
+
+- `SafeL2`: `0xF63b305B4dacDba7dc3314b8e238715E2f140492` at block `211`
+- `SafeProxyFactory`: `0xf4486c7e753F5E46F4c0Ef8D4266Cc53D7131020` at block `185`
+
+Use `.env.fenine.sample` as the starting point for a self-hosted deployment on Fenine.
+
+For real-RPC validation on Fenine, use `scripts/smoke_test_fenine.sh`.
+The regular `pytest` suite is meant for a disposable local chain, not a shared live network.
+
 
 ## Setup for production (tracing mode)
 This is the recommended configuration for running a production Transaction service. `docker-compose` is required
